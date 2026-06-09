@@ -7,14 +7,13 @@ const planets = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uran
 
 export const PlanetProvider = ({ children }) => {
     const [activePlanet, setActivePlanet] = useState("Earth")
-    const url = `https://api.le-systeme-solaire.net/rest/bodies/${activePlanet.toLowerCase()}`
+    // Reverting to the direct ID-based path
+    const url = `/api/bodies/${activePlanet.toLowerCase()}`
     const {data, loading, error} = useFetch(url)
-    
+
     console.log("--- Planet Context Debug ---");
     console.log("Target URL:", url);
-    console.log("Data:", data);
-    console.log("Loading:", loading);
-    console.log("Error:", error);
+    console.log("Data Received:", data);
     
     const value = {
         planets,

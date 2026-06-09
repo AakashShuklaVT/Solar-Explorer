@@ -4,9 +4,9 @@ import App from './App.jsx'
 import { PlanetProvider } from './context/PlanetContext.jsx'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
+ // <StrictMode>
     <PlanetProvider>
       <App />
     </PlanetProvider>
-  </StrictMode>,
+//  </StrictMode>,
 )
