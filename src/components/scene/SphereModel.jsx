@@ -18,8 +18,7 @@ const SphereModel = () => {
     Jupiter: '/textures/jupiter.jpg',
     Saturn: '/textures/saturn.jpg',
     Uranus: '/textures/uranus.jpg',
-    // Fallback to Neptune texture if you add it, or Earth for now
-    Neptune: '/textures/uranus.jpg', 
+    Neptune: '/textures/neptune.jpg', 
   };
 
   // 2. Load the texture (this automatically uses Suspense)
