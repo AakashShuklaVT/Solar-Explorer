@@ -3,20 +3,24 @@ import { usePlanetContext } from '../../context/PlanetContext'
 
 const Sidebar = () => {
     const { planets, activePlanet, setActivePlanet } = usePlanetContext()
-    console.log(activePlanet);
 
     return (
-        <ul>
+        <nav className="sidebar">
+            <h2 style={{ fontSize: '14px', letterSpacing: '2px', marginBottom: '10px', color: '#2271b3' }}>PLANETS</h2>
             {
-                planets.map((planet, index) => {
+                planets.map((planet) => {
                     return (
-                        <li key={index}><span>{planet}</span> <button onClick={() => {
-                            setActivePlanet(planet)
-                        }}>Select</button></li>
+                        <button 
+                            key={planet}
+                            className={activePlanet === planet ? 'active' : ''}
+                            onClick={() => setActivePlanet(planet)}
+                        >
+                            {planet}
+                        </button>
                     )
                 })
             }
-        </ul>
+        </nav>
     )
 }
 

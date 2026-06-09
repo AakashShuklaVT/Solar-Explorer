@@ -5,9 +5,9 @@ import MainScene from './components/scene/MainScene';
 
 function App() {
   return (
-    <div style={{ display: 'flex' }}>
+    <div className="app-container">
       <Sidebar />
-      <main style={{ flex: 1, position: 'relative' }}>
+      <main className="view-container">
         <MainScene />
       </main>
     </div>

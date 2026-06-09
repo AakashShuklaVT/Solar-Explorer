@@ -4,10 +4,66 @@
   box-sizing: border-box;
 }
 
-body,
-html {
-  width: 100dvw;
-  height: 100dvh;
-  background: #ffffff;
-  font-family: sans-serif;
+body, html, #root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #050505;
+  color: white;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.view-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.sidebar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 220px;
+  background: rgba(10, 10, 10, 0.7);
+  backdrop-filter: blur(15px);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar button {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a0a0a0;
+  padding: 10px;
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sidebar button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.sidebar button.active {
+  background: rgba(34, 113, 179, 0.2);
+  border-color: #2271b3;
+  color: #2271b3;
 }
