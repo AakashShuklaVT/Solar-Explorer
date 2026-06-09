@@ -2,7 +2,7 @@ import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Html } from '@react-three/drei';
 import SphereModel from './SphereModel';
-
+import Sun from './Sun'
 const MainScene = () => {
   return (
     <div style={{ width: '100%', height: '100vh' }}>
@@ -18,10 +18,11 @@ const MainScene = () => {
         
         {/* Use Suspense to show a fallback while the texture loads */}
         <Suspense fallback={<Html center><div className="loading-text">Loading Texture...</div></Html>}>
-          <SphereModel />
+          {/* <SphereModel /> */}
         </Suspense>
         
         <OrbitControls enablePan={false} />
+        <Sun />
       </Canvas>
     </div>
   );
