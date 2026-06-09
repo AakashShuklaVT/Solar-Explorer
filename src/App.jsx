@@ -1,9 +1,15 @@
+import React from 'react';
 import './App.css';
+import Sidebar from './components/ui/Sidebar';
+import MainScene from './components/scene/MainScene';
 
 function App() {
   return (
-    <div className="app-container">
-      <h1>Solar Explorer</h1>
+    <div style={{ display: 'flex' }}>
+      <Sidebar />
+      <main style={{ flex: 1, position: 'relative' }}>
+        <MainScene />
+      </main>
     </div>
   );
 }
