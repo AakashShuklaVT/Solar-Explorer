@@ -7,9 +7,11 @@ const MainScene = () => {
   return (
     <div style={{ width: '100%', height: '100vh' }}>
       <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
-        <color attach="background" args={['#050505']} />
+        <color attach="background" args={['#000000']} />
         
-        <ambientLight intensity={0.5} />
+        <ambientLight intensity={1} />
+        <directionalLight intensity={4} />
+
         <pointLight position={[10, 10, 10]} intensity={1.5} />
         
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
