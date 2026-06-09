@@ -1,63 +1,47 @@
-# 🌌 Solar System Explorer
+# 🌌 Solar System Explorer: The Simulation
 
-A professional, interactive dashboard for exploring our celestial neighborhood. This project serves as a strategic bridge for developers transitioning from **Core React** to **React Three Fiber (R3F)**.
+A professional, interactive 3D simulation of our celestial neighborhood. This project evolves from a static dashboard into a dynamic, state-driven space simulation using **React Three Fiber (R3F)**.
 
-## 🎯 Project Vision
-The Solar System Explorer focuses on the architectural pattern of using **Shared React State** to drive a **Multi-Visual Interface** (2D UI + 3D Canvas). We build in parallel to understand how React controls 3D space from day one.
-
----
-
-## 🏗️ The "Bridge" Architecture (Why Context?)
-
-### The Wrong Path: Prop Drilling
-In a complex app, your hierarchy might look like this:
-`App -> Dashboard -> Sidebar -> PlanetList -> PlanetButton`
-If the `PlanetButton` needs to tell the `3DCanvas` (which is in a different branch) which planet was clicked, you'd have to pass a "callback function" up 4 levels and then down 3 levels. 
-*   **The Pitfall**: This makes your components "messy" and hard to move. If you move the Sidebar, you break the whole chain.
-
-### The Right Path: Context API
-Context acts like a "Radio Station" (Broadcaster).
-1.  **The Provider**: Broadcasts "Earth is selected".
-2.  **The Sidebar**: Listens and highlights the Earth button.
-3.  **The 3D Canvas**: Listens and zooms into the Earth model.
-*   **The Intuition**: Any component, no matter how deep it is, can "tune in" to the data it needs without bothering its parents.
+## 🎯 Revised Project Vision
+The Solar Explorer is now a **Full System Simulation**. Instead of viewing one planet at a time, the user explores a complete solar system where planets orbit the Sun in real-time. Interaction is handled via 3D Raycasting, allowing users to "click" planets in space to retrieve their NASA data.
 
 ---
 
-## 🚀 Parallel Roadmap
+## 🏗️ Advanced Architecture
 
-### Phase 1: The Foundation (The "Bridge")
-- [ ] **Global State**: Set up `PlanetContext` to store the `activePlanet`.
-- [ ] **Dual View**: Create a basic `Layout` with a 2D Sidebar and a 3D `<Canvas>`.
-- [ ] **The Reactive Sphere**: Make a 3D sphere that changes color based on the selected planet in the sidebar.
+### Interaction: Raycasting vs. HTML
+- **The Old Way**: Clicking a button in a 2D sidebar.
+- **The Simulation Way**: Clicking the 3D planet directly.
+- **The Intuition**: Raycasting is like firing a "laser beam" from your mouse into the 3D world. If the laser hits a planet, R3F tells us which one was hit. This makes the experience feel "physical" and immersive.
 
-### Phase 2: Data & Dynamics
-- [ ] **Asynchronous Fetching**: Create a `useFetch` hook to get real data from the Solar System API.
-- [ ] **Data Mapping**: Use API results to update UI text (2D) and Planet size/scale (3D).
-- [ ] **Interactive HUD**: Build a "Fact Sheet" overlay that displays planetary metrics.
+### Orbital Mechanics
+- Planets move along elliptical or circular paths based on their real distance from the Sun.
+- **Source of Truth**: The `PlanetContext` now manages the "Focus Planet"—the one the camera is currently following.
 
-### Phase 3: Polish & Performance
-- [ ] **Textures**: Map real NASA planetary textures onto R3F spheres.
-- [ ] **Atmosphere & Lights**: Add realistic lighting and "glow" effects to the sun and planets.
-- [ ] **Comparison Engine**: Side-by-side comparison of two planets in 3D space.
+---
+
+## 🚀 The Simulation Roadmap
+
+### Phase 1: The Heliosphere (Current)
+- [x] **Global State**: `PlanetContext` for active selection.
+- [x] **Data Brain**: `useFetch` hook for real-time NASA telemetry.
+- [ ] **The Sun**: A central light source with a high-intensity "Glow" (Bloom effect).
+- [ ] **Orbital Paths**: Rendering 3D lines (Torus or Line) to show the path of each planet.
+
+### Phase 2: System Dynamics
+- [ ] **Multi-Planet Render**: Move from a single sphere to rendering all 8 planets simultaneously.
+- [ ] **Orbital Loop**: Use `useFrame` to make planets revolve around the Sun at relative speeds.
+- [ ] **Raycasting Interaction**: Implement `onClick` events on 3D meshes to update the `activePlanet` context.
+
+### Phase 3: The Explorer Experience
+- [ ] **Cinematic Camera**: Smoothly transition the camera to "zoom in" on a clicked planet using `drei`'s `CameraControls`.
+- [ ] **The HUD Overlay**: A futuristic 2D interface that displays the focused planet's data.
+- [ ] **Post-Processing**: Adding "Bloom" for the sun and "Motion Blur" for realistic space travel.
 
 ---
 
 ## 🛠️ Technical Stack
 - **Framework**: React (Vite)
 - **3D Engine**: `react-three-fiber` + `three` + `drei`
-- **State**: Context API
-- **Styling**: Vanilla CSS (Premium Space Theme)
-
----
-
-## 📂 Directory Structure
-```text
-src/
-├── components/       
-│   ├── ui/           # 2D HTML Elements (Sidebar, HUD)
-│   └── scene/        # 3D R3F Elements (Canvas, Planets, Stars)
-├── context/          # PlanetContext (The Radio Station)
-├── hooks/            # usePlanetData (API logic)
-└── assets/           # Textures and Models
-```
+- **State**: Context API (Selection & Focus)
+- **Math**: Sine/Cosine for orbital paths.
