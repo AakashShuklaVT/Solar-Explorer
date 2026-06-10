@@ -1,180 +1,11 @@
-import React, { useRef, useMemo, useLayoutEffect } from 'react';
+import React, { useRef, useMemo } from 'react';
 import * as THREE from 'three';
-import { useFrame, useThree, extend } from '@react-three/fiber';
-import { shaderMaterial } from '@react-three/drei';
+import { useFrame, useThree } from '@react-three/fiber';
 
-// Shaders
-import perlinVS from '../../assets/shaders/perlinVS.glsl';
-import perlinFS from '../../assets/shaders/perlinFS.glsl';
-import sunSphereVS from '../../assets/shaders/sunSphereVS.glsl';
-import sunSphereFS from '../../assets/shaders/sunSphereFS.glsl';
-import glowVS from '../../assets/shaders/glowVS.glsl';
-import glowFS from '../../assets/shaders/glowFS.glsl';
-import sunRaysVS from '../../assets/shaders/sunRaysVS.glsl';
-import sunRaysFS from '../../assets/shaders/sunRaysFS.glsl';
-import sunFlaresVS from '../../assets/shaders/sunFlaresVS.glsl';
-import sunFlaresFS from '../../assets/shaders/sunFlaresFS.glsl';
+import { usePlanetContext } from '../../context/PlanetContext';
+import './SunMaterials';
+import { PerlinMaterial } from './SunMaterials';
 
-// Materials
-const PerlinMaterial = shaderMaterial(
-  {
-    uTime: 0,
-    uSpatialFrequency: 6,
-    uTemporalFrequency: 0.1,
-    uH: 1,
-    uContrast: 0.25,
-    uFlatten: 0.72,
-  },
-  perlinVS,
-  perlinFS
-);
-
-const SunSphereMaterial = shaderMaterial(
-  {
-    uTime: 0,
-    uPerlinCube: null,
-    uFresnelPower: 1.0,
-    uFresnelInfluence: 0.8,
-    uTint: 0.2,
-    uBase: 4.0,
-    uBrightnessOffset: 1,
-    uBrightness: 0.6,
-    uVisibility: 1,
-    uDirection: 1.0,
-    uLightView: new THREE.Vector3(1, 1, 1).normalize(),
-  },
-  sunSphereVS,
-  sunSphereFS
-);
-
-const GlowMaterial = shaderMaterial(
-  {
-    uViewProjection: new THREE.Matrix4(),
-    uRadius: 0.4,
-    uTint: 0.4,
-    uBrightness: 1.06,
-    uFalloffColor: 0.5,
-    uCamUp: new THREE.Vector3(0, 1, 0),
-    uCamPos: new THREE.Vector3(),
-    uVisibility: 1,
-    uDirection: 1,
-    uLightView: new THREE.Vector3(1, 1, 1).normalize(),
-  },
-  glowVS,
-  glowFS
-);
-
-const SunRaysMaterial = shaderMaterial(
-  {
-    uViewProjection: new THREE.Matrix4(),
-    uCamPos: new THREE.Vector3(),
-    uTime: 0,
-    uVisibility: 1,
-    uDirection: 1,
-    uLightView: new THREE.Vector3(1, 1, 1).normalize(),
-    uWidth: 0.03,
-    uLength: 0.45,
-    uOpacity: 0.03,
-    uNoiseFrequency: 8.0,
-    uNoiseAmplitude: 0.4,
-    uAlphaBlended: 0.3,
-    uHueSpread: 0.2,
-    uHue: 0.2,
-    uResolution: new THREE.Vector4(),
-  },
-  sunRaysVS,
-  sunRaysFS
-);
-
-const SunFlaresMaterial = shaderMaterial(
-  {
-    uViewProjection: new THREE.Matrix4(),
-    uCamPos: new THREE.Vector3(),
-    uTime: 0,
-    uVisibility: 1,
-    uDirection: 1,
-    uLightView: new THREE.Vector3(1, 1, 1).normalize(),
-    uWidth: 0.03,
-    uAmp: 0.08,
-    uOpacity: 0.03,
-    uNoiseFrequency: 8.0,
-    uNoiseAmplitude: 0.4,
-    uAlphaBlended: 0.3,
-    uHueSpread: 0.1,
-    uHue: 0.1,
-    uResolution: new THREE.Vector4(),
-  },
-  sunFlaresVS,
-  sunFlaresFS
-);
-
-extend({ PerlinMaterial, SunSphereMaterial, GlowMaterial, SunRaysMaterial, SunFlaresMaterial });
-
-const SunGlow = ({ sunMaterialRef }) => {
-  const meshRef = useRef();
-  const materialRef = useRef();
-  const { camera } = useThree();
-
-  const geometry = useMemo(() => {
-    const segments = 134;
-    const rSphere = 1.49;
-    const positions = new Float32Array(3 * (2 * segments));
-    let r = 0;
-    for (let a = 0; a < segments; a++) {
-      const s = (a / segments) * Math.PI * 2.0;
-      const sx = Math.sin(s) * rSphere;
-      const sy = Math.cos(s) * rSphere;
-      positions[r++] = sx; positions[r++] = sy; positions[r++] = 0.0;
-      positions[r++] = sx; positions[r++] = sy; positions[r++] = 1.0;
-    }
-    const indices = new Uint16Array(2 * segments * 3);
-    let o = 0;
-    for (let a = 0; a < segments; a++) {
-      const i0 = 2 * a;
-      const i1 = 2 * a + 1;
-      const i2 = 2 * ((a + 1) % segments);
-      const i3 = i2 + 1;
-      indices[o++] = i0; indices[o++] = i1; indices[o++] = i2;
-      indices[o++] = i2; indices[o++] = i1; indices[o++] = i3;
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('aPos', new THREE.Float32BufferAttribute(positions, 3));
-    geo.setIndex(new THREE.BufferAttribute(indices, 1));
-    return geo;
-  }, []);
-
-  useFrame((state) => {
-    const { camera } = state;
-    if (materialRef.current && sunMaterialRef.current) {
-      camera.updateMatrixWorld();
-      const vp = new THREE.Matrix4().multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-      materialRef.current.uViewProjection.copy(vp);
-
-      const camUp = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion).normalize();
-      materialRef.current.uCamUp.copy(camUp);
-
-      camera.getWorldPosition(materialRef.current.uCamPos);
-
-      materialRef.current.uVisibility = sunMaterialRef.current.uVisibility;
-      materialRef.current.uDirection = sunMaterialRef.current.uDirection;
-      materialRef.current.uLightView.copy(sunMaterialRef.current.uLightView);
-    }
-  });
-
-  return (
-    <mesh ref={meshRef} geometry={geometry} frustumCulled={false} renderOrder={2}>
-      <glowMaterial 
-        ref={materialRef} 
-        transparent 
-        premultipliedAlpha 
-        depthWrite={false} 
-        depthTest={false} 
-        blending={THREE.NormalBlending} 
-        side={THREE.DoubleSide} 
-      />
-    </mesh>
-  );
-};
 
 const SunRays = ({ sunMaterialRef }) => {
   const materialRef = useRef();
@@ -266,13 +97,13 @@ const SunRays = ({ sunMaterialRef }) => {
 
   return (
     <mesh geometry={geometry} frustumCulled={false} renderOrder={3}>
-      <sunRaysMaterial 
-        ref={materialRef} 
-        transparent 
-        premultipliedAlpha 
-        depthWrite={false} 
-        blending={THREE.AdditiveBlending} 
-        side={THREE.DoubleSide} 
+      <sunRaysMaterial
+        ref={materialRef}
+        transparent
+        premultipliedAlpha
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
@@ -355,13 +186,13 @@ const SunFlares = ({ sunMaterialRef }) => {
 
   return (
     <mesh geometry={geometry} frustumCulled={false} renderOrder={1}>
-      <sunFlaresMaterial 
-        ref={materialRef} 
-        transparent 
-        premultipliedAlpha 
-        depthWrite={false} 
-        blending={THREE.AdditiveBlending} 
-        side={THREE.DoubleSide} 
+      <sunFlaresMaterial
+        ref={materialRef}
+        transparent
+        premultipliedAlpha
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
@@ -371,6 +202,17 @@ const AdvancedSun = () => {
   const sphereMaterialRef = useRef();
   const perlinMaterialRef = useRef();
   const { gl, scene, camera } = useThree();
+  const { sunData } = usePlanetContext();
+  const earthRadius = 6371.0084;
+
+  const sunScale = useMemo(() => {
+    if (sunData && sunData.meanRadius) {
+      // The true relative scale is (sunData.meanRadius / earthRadius) which is ~109.
+      // We divide by 30 to make it visually pleasing without covering the whole screen.
+      return (sunData.meanRadius / earthRadius) / 30;
+    }
+    return 2.5; // fallback scale before data loads
+  }, [sunData]);
 
   const [cubeRT, cubeCam] = useMemo(() => {
     const res = 512;
@@ -405,18 +247,18 @@ const AdvancedSun = () => {
   });
 
   return (
-    <group>
+    <group scale={[sunScale, sunScale, sunScale]}>
       <mesh>
         <sphereGeometry args={[1.5, 64, 64]} />
-        <sunSphereMaterial 
-          ref={sphereMaterialRef} 
-          transparent 
-          premultipliedAlpha 
-          blending={THREE.NormalBlending} 
-          depthWrite={true} 
+        <sunSphereMaterial
+          ref={sphereMaterialRef}
+          transparent
+          premultipliedAlpha
+          blending={THREE.NormalBlending}
+          depthWrite={true}
         />
       </mesh>
-      <SunGlow sunMaterialRef={sphereMaterialRef} />
+
       <SunRays sunMaterialRef={sphereMaterialRef} />
       <SunFlares sunMaterialRef={sphereMaterialRef} />
       <pointLight intensity={10} distance={100} color="#ffcc00" />

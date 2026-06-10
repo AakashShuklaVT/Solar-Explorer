@@ -2,14 +2,14 @@ import { createContext, useContext, useState } from "react";
 import { useFetch } from "../hooks/useFetch";
 
 const PlanetContext = createContext()
-const planets = ["Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
+const planets = ["Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
 
 
 export const PlanetProvider = ({ children }) => {
     const [activePlanet, setActivePlanet] = useState("Earth")
     const url = `/api/bodies/${activePlanet.toLowerCase()}`
     const {data, loading, error} = useFetch(url)
-
+    const {data: sunData} = useFetch(`/api/bodies/sun`)
     console.log("Data Received:", data);
     
     const value = {
@@ -18,7 +18,8 @@ export const PlanetProvider = ({ children }) => {
         setActivePlanet,
         data,
         loading,
-        error
+        error,
+        sunData
     }
 
     return (

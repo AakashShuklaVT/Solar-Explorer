@@ -32,7 +32,7 @@ const SphereModel = () => {
   });
 
   return (
-    <mesh ref={meshRef} scale={[scale, scale, scale]}>
+    <mesh ref={meshRef} position={[6, 0, 0]} scale={[scale, scale, scale]}>
       <sphereGeometry args={[1, 64, 64]} />
       <meshStandardMaterial
         map={planetTexture}

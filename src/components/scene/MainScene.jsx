@@ -18,11 +18,11 @@ const MainScene = () => {
         
         {/* Use Suspense to show a fallback while the texture loads */}
         <Suspense fallback={<Html center><div className="loading-text">Loading Texture...</div></Html>}>
-          {/* <SphereModel /> */}
+          <SphereModel />
         </Suspense>
         
         <OrbitControls enablePan={true} />
-        <AdvancedSun />
+        <AdvancedSun /> 
       </Canvas>
     </div>
   );
