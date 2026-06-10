@@ -2,11 +2,11 @@ import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Html } from '@react-three/drei';
 import SphereModel from './SphereModel';
-import Sun from './Sun'
+import AdvancedSun from './AdvancedSun'
 const MainScene = () => {
   return (
     <div style={{ width: '100%', height: '100vh' }}>
-      <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
+      <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
         <color attach="background" args={['#000000']} />
         
         <ambientLight intensity={1} />
@@ -21,8 +21,8 @@ const MainScene = () => {
           {/* <SphereModel /> */}
         </Suspense>
         
-        <OrbitControls enablePan={false} />
-        <Sun />
+        <OrbitControls enablePan={true} />
+        <AdvancedSun />
       </Canvas>
     </div>
   );
