@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 
 import { usePlanetContext } from '../../context/PlanetContext';
+import { EARTH_RADIUS_KM, GLOBAL_SCALE_DIVISOR } from '../../utils/constants';
 import './SunMaterials';
 import { PerlinMaterial } from './SunMaterials';
 
@@ -203,15 +204,12 @@ const AdvancedSun = () => {
   const perlinMaterialRef = useRef();
   const { gl, scene, camera } = useThree();
   const { sunData } = usePlanetContext();
-  const earthRadius = 6371.0084;
 
   const sunScale = useMemo(() => {
     if (sunData && sunData.meanRadius) {
-      // The true relative scale is (sunData.meanRadius / earthRadius) which is ~109.
-      // We divide by 30 to make it visually pleasing without covering the whole screen.
-      return (sunData.meanRadius / earthRadius) / 30;
+      return (sunData.meanRadius / EARTH_RADIUS_KM) / GLOBAL_SCALE_DIVISOR;
     }
-    return 2.5; // fallback scale before data loads
+    return 2.5; 
   }, [sunData]);
 
   const [cubeRT, cubeCam] = useMemo(() => {

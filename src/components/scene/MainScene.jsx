@@ -1,27 +1,30 @@
 import React, { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Stars, Html } from '@react-three/drei';
-import SphereModel from './SphereModel';
 import AdvancedSun from './AdvancedSun'
+import Planet from './Planet';
+import { usePlanetContext } from '../../context/PlanetContext';
+
 const MainScene = () => {
+  const { planetsData } = usePlanetContext();
+
   return (
     <div style={{ width: '100%', height: '100vh' }}>
-      <Canvas camera={{ position: [0, 0, 10], fov: 45 }}>
-        <color attach="background" args={['#000000']} />
+      <Canvas camera={{ position: [0, 5, 20], fov: 45, far:10000}}>
+        <color attach="background" args={['#020205']} />
         
+        {/* We keep ambient light very low for realistic space! */}
         <ambientLight intensity={1} />
-        <directionalLight intensity={4} />
-
-        <pointLight position={[10, 10, 10]} intensity={1.5} />
         
-        <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+        <Stars radius={200} depth={50} count={7000} factor={4} saturation={0} fade speed={1} />
         
-        {/* Use Suspense to show a fallback while the texture loads */}
-        <Suspense fallback={<Html center><div className="loading-text">Loading Texture...</div></Html>}>
-          <SphereModel />
+        <Suspense fallback={<Html center><div className="loading-text">Loading Textures...</div></Html>}>
+          {planetsData && planetsData.map((planet) => (
+            <Planet key={planet.id} planetData={planet} />
+          ))}
         </Suspense>
         
-        <OrbitControls enablePan={true} />
+        <OrbitControls enablePan={true} minDistance={1} maxDistance={1000} />
         <AdvancedSun /> 
       </Canvas>
     </div>

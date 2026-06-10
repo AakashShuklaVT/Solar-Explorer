@@ -1,39 +1,40 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { useFetch } from "../hooks/useFetch";
 
-const PlanetContext = createContext()
-const planets = ["Sun", "Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"]
-
+const PlanetContext = createContext();
 
 export const PlanetProvider = ({ children }) => {
-    const [activePlanet, setActivePlanet] = useState("Earth")
-    const url = `/api/bodies/${activePlanet.toLowerCase()}`
-    const {data, loading, error} = useFetch(url)
-    const {data: sunData} = useFetch(`/api/bodies/sun`)
-    console.log("Data Received:", data);
+    const [activePlanet, setActivePlanet] = useState("Earth");
+    const { data: sunData } = useFetch(`/api/bodies/soleil`);
+    const { data: allPlanetsResponse, loading, error } = useFetch(`/api/bodies?filter[]=isPlanet,eq,true`);
+
+    const planetsData = allPlanetsResponse ? allPlanetsResponse.bodies : [];
+
+    const activePlanetData = planetsData.find(
+        (p) => p.englishName.toLowerCase() === activePlanet.toLowerCase()
+    );
     
     const value = {
-        planets,
-        activePlanet,
-        setActivePlanet,
-        data,
+        planetsData,       
+        activePlanet,      
+        setActivePlanet,   
+        activePlanetData,  
+        sunData,
         loading,
-        error,
-        sunData
-    }
+        error
+    };
 
     return (
         <PlanetContext.Provider value={value}>
             {children}
         </PlanetContext.Provider>
-    )
-}
-
+    );
+};
 
 export const usePlanetContext = () => {
-    const context = useContext(PlanetContext)
+    const context = useContext(PlanetContext);
     if (!context) {
-        throw new Error("usePlanetContext must be used within an PlanetProvider");
+        throw new Error("usePlanetContext must be used within a PlanetProvider");
     }
-    return context
-}
+    return context;
+};
