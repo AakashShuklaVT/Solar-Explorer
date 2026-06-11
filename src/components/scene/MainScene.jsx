@@ -16,7 +16,7 @@ const MainScene = () => {
         {/* We keep ambient light very low for realistic space! */}
         <ambientLight intensity={1} />
 
-        {/* <Stars radius={200} depth={50} count={7000} factor={4} saturation={0} fade speed={1} /> */}
+        <Stars radius={200} depth={50} count={7000} factor={4} saturation={0} fade speed={1} />
 
         <Suspense fallback={<Html center><div className="loading-text">Loading Textures...</div></Html>}>
           {planetsData && planetsData.map((planet) => (

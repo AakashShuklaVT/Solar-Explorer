@@ -33,7 +33,7 @@ const SaturnRings = () => {
 const Planet = ({ planetData }) => {
   const planetRef = useRef();
   const orbitGroupRef = useRef();
-  const { activePlanet } = usePlanetContext();
+  const { activePlanet, setActivePlanet } = usePlanetContext();
 
   // 1. Get the texture path based on the planet's name
   const texturePath = textureMap[planetData.englishName] || textureMap.Earth;
@@ -69,32 +69,60 @@ const Planet = ({ planetData }) => {
 
   const handlePlanetClick = (e) => {
     e.stopPropagation()
-    console.log(planetData.englishName)
+    setActivePlanet(planetData.englishName)
+    console.log("Clicked:", planetData.englishName)
   }
 
   return (
     <>
       {/* 6. The visual Orbit Line (Static, centered at [0,0,0]) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} onClick={(e) => {
-        console.log(2);
-        
-        handlePlanetClick(e)
-      }}>
+      <mesh 
+        rotation={[-Math.PI / 2, 0, 0]} 
+        onClick={handlePlanetClick}
+        onPointerOver={() => (document.body.style.cursor = 'pointer')}
+        onPointerOut={() => (document.body.style.cursor = 'auto')}
+      >
         {/* Torus creates a perfect ring at radius distanceX */}
-        <torusGeometry args={[distanceX, 0.02, 16, 100]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.7} />
+        <torusGeometry args={[distanceX, isSelected ? 0.02 : 0.008, 16, 100]} />
+        <meshBasicMaterial 
+          color={isSelected ? "#2271b3" : "#ffffff"} 
+          transparent 
+          opacity={isSelected ? 1 : 0.3} 
+        />
       </mesh>
 
       {/* 7. The Rotating Orbit Group */}
       <group ref={orbitGroupRef}>
-        <mesh ref={planetRef} position={[distanceX, 0, 0]} scale={[scale, scale, scale]}>
-          <sphereGeometry args={[1, 64, 64]} />
-          <meshStandardMaterial
-            map={planetTexture}
-          />
-          {/* Render the rings ONLY if this planet is Saturn */}
-          {planetData.englishName === 'Saturn' && <SaturnRings />}
-        </mesh>
+        <group position={[distanceX, 0, 0]}>
+          <mesh 
+            ref={planetRef} 
+            scale={[scale, scale, scale]}
+            onClick={handlePlanetClick}
+            onPointerOver={() => (document.body.style.cursor = 'pointer')}
+            onPointerOut={() => (document.body.style.cursor = 'auto')}
+          >
+            <sphereGeometry args={[1, 64, 64]} />
+            <meshStandardMaterial
+              map={planetTexture}
+            />
+            {/* Render the rings ONLY if this planet is Saturn */}
+            {planetData.englishName === 'Saturn' && <SaturnRings />}
+          </mesh>
+
+          {/* 8. Selection Highlight (Rim/Border) */}
+          {isSelected && (
+            <mesh scale={[scale * 1.1, scale * 1.1, scale * 1.1]}>
+              <sphereGeometry args={[1, 64, 64]} />
+              <meshBasicMaterial 
+                color="#2271b3" 
+                transparent 
+                opacity={0.5} 
+                side={THREE.BackSide}
+                blending={THREE.AdditiveBlending}
+              />
+            </mesh>
+          )}
+        </group>
       </group>
     </>
   );
