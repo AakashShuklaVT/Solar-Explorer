@@ -254,12 +254,9 @@ const AdvancedSun = () => {
           premultipliedAlpha
           blending={THREE.NormalBlending}
           depthWrite={true}
-          uBrightness={1.2}
-          uTint={0.4}
         />
       </mesh>
 
-      <SunRays sunMaterialRef={sphereMaterialRef} />
       <SunFlares sunMaterialRef={sphereMaterialRef} />
       <pointLight intensity={10} distance={100} color="#ffcc00" />
     </group>
