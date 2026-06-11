@@ -22,9 +22,9 @@ const SaturnRings = () => {
     <mesh rotation={[-Math.PI / 2, 0, 0]}>
       {/* args are [innerRadius, outerRadius, thetaSegments] */}
       <ringGeometry args={[1.2, 2.4, 64]} />
-      <meshStandardMaterial 
-        map={ringTexture} 
-        side={THREE.DoubleSide} 
+      <meshStandardMaterial
+        map={ringTexture}
+        side={THREE.DoubleSide}
       />
     </mesh>
   );
@@ -48,7 +48,7 @@ const Planet = ({ planetData }) => {
   // 4. Calculate animation speeds from API data
   // sideralOrbit is in days. We divide 1 by it so farther planets move slower.
   const orbitSpeed = (1 / planetData.sideralOrbit) * ORBIT_SPEED_MULTIPLIER;
-  
+
   // sideralRotation is in hours.
   const rotationSpeed = (1 / planetData.sideralRotation) * ROTATION_SPEED_MULTIPLIER;
 
@@ -67,10 +67,19 @@ const Planet = ({ planetData }) => {
     }
   });
 
+  const handlePlanetClick = (e) => {
+    e.stopPropagation()
+    console.log(planetData.englishName)
+  }
+
   return (
     <>
       {/* 6. The visual Orbit Line (Static, centered at [0,0,0]) */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]}>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} onClick={(e) => {
+        console.log(2);
+        
+        handlePlanetClick(e)
+      }}>
         {/* Torus creates a perfect ring at radius distanceX */}
         <torusGeometry args={[distanceX, 0.02, 16, 100]} />
         <meshBasicMaterial color="#ffffff" transparent opacity={0.7} />

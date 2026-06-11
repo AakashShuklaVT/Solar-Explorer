@@ -5,6 +5,7 @@ const PlanetContext = createContext();
 
 export const PlanetProvider = ({ children }) => {
     const [activePlanet, setActivePlanet] = useState("Earth");
+    const [isCameraAtDestination, setIsCameraAtDestination] = useState(false)
     const { data: sunData } = useFetch(`/api/bodies/soleil`);
     const { data: allPlanetsResponse, loading, error } = useFetch(`/api/bodies?filter[]=isPlanet,eq,true`);
 
@@ -19,6 +20,7 @@ export const PlanetProvider = ({ children }) => {
         activePlanet,      
         setActivePlanet,   
         activePlanetData,  
+        isCameraAtDestination,
         sunData,
         loading,
         error
