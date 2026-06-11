@@ -5,6 +5,17 @@ import * as THREE from 'three';
 import { usePlanetContext } from '../../context/PlanetContext';
 import { EARTH_RADIUS_KM, GLOBAL_SCALE_DIVISOR, DISTANCE_SCALE, SUN_BUFFER, PLANET_SCALE_MULTIPLIER, ORBIT_SPEED_MULTIPLIER, ROTATION_SPEED_MULTIPLIER } from '../../utils/constants';
 import PlanetInfoUI from './PlanetInfoUI';
+import Atmosphere from './Atmosphere';
+
+const atmosphereColors = {
+  Venus: '#ffcc88',
+  Earth: '#4488ff',
+  Mars: '#ff6633',
+  Jupiter: '#ccaa88',
+  Saturn: '#ccaa88',
+  Uranus: '#88ccff',
+  Neptune: '#4488ff',
+};
 
 const textureMap = {
   Mercury: '/textures/mercury.jpg',
@@ -140,6 +151,11 @@ const Planet = ({ planetData }) => {
             {/* Render the rings ONLY if this planet is Saturn */}
             {planetData.englishName === 'Saturn' && <SaturnRings />}
           </mesh>
+
+          {/* Atmosphere Effect */}
+          {atmosphereColors[planetData.englishName] && (
+            <Atmosphere color={atmosphereColors[planetData.englishName]} scale={scale} />
+          )}
 
           {/* 8. Selection Highlight (Rim/Border) */}
           {isSelected && (

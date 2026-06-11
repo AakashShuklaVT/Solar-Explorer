@@ -254,6 +254,8 @@ const AdvancedSun = () => {
           premultipliedAlpha
           blending={THREE.NormalBlending}
           depthWrite={true}
+          uBrightness={1.2}
+          uTint={0.4}
         />
       </mesh>
 
