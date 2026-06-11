@@ -67,3 +67,94 @@ body, html, #root {
   border-color: #2271b3;
   color: #2271b3;
 }
+
+/* 3D Planet Info UI Styles */
+.planet-info-wrapper {
+  pointer-events: none;
+  user-select: none;
+}
+
+.planet-card {
+  background: rgba(10, 10, 10, 0.8); /* Slightly darker for better readability */
+  backdrop-filter: blur(20px);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  min-width: 260px;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(34, 113, 179, 0.1);
+  animation: cardFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.planet-card h3 {
+  color: white;
+  font-size: 20px;
+  margin: 0;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.planet-card h3::after {
+  content: '';
+  width: 40px;
+  height: 2px;
+  background: #2271b3;
+  display: inline-block;
+}
+
+.info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(34, 113, 179, 0.4); /* Clear blue border */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.info-item:hover {
+  background: rgba(34, 113, 179, 0.1);
+  border-color: #2271b3;
+}
+
+.info-item span {
+  font-size: 10px;
+  color: #808080;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.info-item p {
+  font-size: 14px;
+  color: #e0e0e0;
+  font-weight: 500;
+  margin: 0;
+}
+
+@keyframes cardFadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px) scale(0.95);
+    filter: blur(10px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}

@@ -21,6 +21,7 @@ export const PlanetProvider = ({ children }) => {
         setActivePlanet,   
         activePlanetData,  
         isCameraAtDestination,
+        setIsCameraAtDestination,
         sunData,
         loading,
         error

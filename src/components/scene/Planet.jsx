@@ -1,8 +1,48 @@
 import React, { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useTexture } from '@react-three/drei';
+import { useTexture, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { usePlanetContext } from '../../context/PlanetContext';
+
+// ... (textureMap and SaturnRings)
+
+const PlanetInfoUI = ({ planetData, isVisible, scale }) => {
+  if (!isVisible) return null;
+
+  // Position the UI offset from the planet's surface
+  // The planet radius is 1, visually it's 1 * scale
+  const offset = scale * 1.5;
+
+  return (
+    <Html 
+      position={[offset, offset, 0]} 
+      center 
+      distanceFactor={scale * 8} 
+    >
+      <div className="planet-card">
+        <h3>{planetData.englishName}</h3>
+        <div className="info-grid">
+          <div className="info-item">
+            <span>Mass</span>
+            <p>{planetData.mass?.massValue}e{planetData.mass?.massExponent} kg</p>
+          </div>
+          <div className="info-item">
+            <span>Gravity</span>
+            <p>{planetData.gravity} m/s²</p>
+          </div>
+          <div className="info-item">
+            <span>Mean Radius</span>
+            <p>{planetData.meanRadius.toLocaleString()} km</p>
+          </div>
+          <div className="info-item">
+            <span>Avg Temp</span>
+            <p>{planetData.avgTemp ? (planetData.avgTemp - 273.15).toFixed(1) : 'N/A'}°C</p>
+          </div>
+        </div>
+      </div>
+    </Html>
+  );
+};
 import { EARTH_RADIUS_KM, GLOBAL_SCALE_DIVISOR, DISTANCE_SCALE, SUN_BUFFER, PLANET_SCALE_MULTIPLIER, ORBIT_SPEED_MULTIPLIER, ROTATION_SPEED_MULTIPLIER } from '../../utils/constants';
 
 const textureMap = {
@@ -33,7 +73,7 @@ const SaturnRings = () => {
 const Planet = ({ planetData }) => {
   const planetRef = useRef();
   const orbitGroupRef = useRef();
-  const { activePlanet, setActivePlanet } = usePlanetContext();
+  const { activePlanet, setActivePlanet, isCameraAtDestination } = usePlanetContext();
 
   // 1. Get the texture path based on the planet's name
   const texturePath = textureMap[planetData.englishName] || textureMap.Earth;
@@ -54,6 +94,9 @@ const Planet = ({ planetData }) => {
 
   // Highlight effect if the planet is selected in the sidebar
   const isSelected = activePlanet === planetData.englishName;
+  const showUI = isSelected && isCameraAtDestination;
+
+  const orbitMaterialRef = useRef();
 
   // 5. The Animation Loop
   useFrame((state, delta) => {
@@ -65,11 +108,24 @@ const Planet = ({ planetData }) => {
     if (orbitGroupRef.current) {
       orbitGroupRef.current.rotation.y += delta * orbitSpeed;
     }
+
+    // NEW: If this is the active planet, we need to update its position in context or global state
+    // so the camera can follow it if it moves. However, for a one-time "move to", 
+    // we can just use the mesh's world position.
+
+    // Adjust orbit opacity based on camera distance to keep it visible
+    if (orbitMaterialRef.current && !isSelected) {
+      const dist = state.camera.position.length();
+      // As distance increases, we boost opacity to compensate for the line getting thinner on screen
+      const opacity = THREE.MathUtils.lerp(0.3, 0.8, Math.min(dist / 500, 1));
+      orbitMaterialRef.current.opacity = opacity;
+    }
   });
 
   const handlePlanetClick = (e) => {
     e.stopPropagation()
     setActivePlanet(planetData.englishName)
+    // We can also trigger the camera directly from here if we want
     console.log("Clicked:", planetData.englishName)
   }
 
@@ -83,11 +139,13 @@ const Planet = ({ planetData }) => {
         onPointerOut={() => (document.body.style.cursor = 'auto')}
       >
         {/* Torus creates a perfect ring at radius distanceX */}
-        <torusGeometry args={[distanceX, isSelected ? 0.02 : 0.008, 16, 100]} />
+        <torusGeometry args={[distanceX, isSelected ? 0.03 : 0.012, 16, 100]} />
         <meshBasicMaterial 
+          ref={orbitMaterialRef}
           color={isSelected ? "#2271b3" : "#ffffff"} 
           transparent 
           opacity={isSelected ? 1 : 0.3} 
+          depthWrite={false}
         />
       </mesh>
 
@@ -96,6 +154,7 @@ const Planet = ({ planetData }) => {
         <group position={[distanceX, 0, 0]}>
           <mesh 
             ref={planetRef} 
+            name={planetData.englishName} // Add name for easy lookup
             scale={[scale, scale, scale]}
             onClick={handlePlanetClick}
             onPointerOver={() => (document.body.style.cursor = 'pointer')}
@@ -122,6 +181,9 @@ const Planet = ({ planetData }) => {
               />
             </mesh>
           )}
+
+          {/* 9. 3D HTML UI */}
+          <PlanetInfoUI planetData={planetData} isVisible={showUI} scale={scale} />
         </group>
       </group>
     </>
