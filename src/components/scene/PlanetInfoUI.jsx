@@ -5,7 +5,6 @@ import { usePlanetContext } from '../../context/PlanetContext';
 const PlanetInfoUI = ({ planetData, isVisible, scale }) => {
   const { setActivePlanet } = usePlanetContext();
   if (!isVisible) return null;
-  console.log(planetData);
   
   // Position the UI offset from the planet's surface
   const offset = scale * 1.5;
@@ -37,6 +36,10 @@ const PlanetInfoUI = ({ planetData, isVisible, scale }) => {
           <div className="info-item">
             <span>Avg Temp</span>
             <p>{planetData.avgTemp ? (planetData.avgTemp - 273.15).toFixed(1) : 'N/A'}°C</p>
+          </div>
+          <div className="info-item">
+            <span>Number of moons : </span>
+            <p>{planetData.moons?.length > 0? planetData.moons.length : 'N/A'}</p>
           </div>
         </div>
       </div>

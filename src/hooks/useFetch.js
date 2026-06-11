@@ -7,7 +7,6 @@ export const useFetch = (url) => {
 
     useEffect(() => {
         if (!url) return
-        console.log(url);
         
         const fetchPlanetData = async () => {
             setLoading(true)
