@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { useTexture, Html } from '@react-three/drei';
+import { useTexture, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { usePlanetContext } from '../../context/PlanetContext';
 import { EARTH_RADIUS_KM, GLOBAL_SCALE_DIVISOR, DISTANCE_SCALE, SUN_BUFFER, PLANET_SCALE_MULTIPLIER, ORBIT_SPEED_MULTIPLIER, ROTATION_SPEED_MULTIPLIER } from '../../utils/constants';
@@ -34,6 +34,8 @@ const SaturnRings = () => {
 const Planet = ({ planetData }) => {
   const planetRef = useRef();
   const orbitGroupRef = useRef();
+  const highlightRef = useRef();
+  const orbitRef = useRef();
   const { activePlanet, setActivePlanet, isCameraAtDestination } = usePlanetContext();
 
   // 1. Get the texture path based on the planet's name
@@ -47,17 +49,22 @@ const Planet = ({ planetData }) => {
   const distanceX = (planetData.semimajorAxis * DISTANCE_SCALE) + SUN_BUFFER;
 
   // 4. Calculate animation speeds from API data
-  // sideralOrbit is in days. We divide 1 by it so farther planets move slower.
   const orbitSpeed = (1 / planetData.sideralOrbit) * ORBIT_SPEED_MULTIPLIER;
-
-  // sideralRotation is in hours.
   const rotationSpeed = (1 / planetData.sideralRotation) * ROTATION_SPEED_MULTIPLIER;
 
   // Highlight effect if the planet is selected in the sidebar
   const isSelected = activePlanet === planetData.englishName;
   const showUI = isSelected && isCameraAtDestination;
 
-  const orbitMaterialRef = useRef();
+  // Generate points for the orbit line (circle)
+  const orbitPoints = useMemo(() => {
+    const points = [];
+    for (let i = 0; i <= 128; i++) {
+      const angle = (i / 128) * Math.PI * 2;
+      points.push(new THREE.Vector3(Math.cos(angle) * distanceX, 0, Math.sin(angle) * distanceX));
+    }
+    return points;
+  }, [distanceX]);
 
   // 5. The Animation Loop
   useFrame((state, delta) => {
@@ -70,16 +77,28 @@ const Planet = ({ planetData }) => {
       orbitGroupRef.current.rotation.y += delta * orbitSpeed;
     }
 
-    // NEW: If this is the active planet, we need to update its position in context or global state
-    // so the camera can follow it if it moves. However, for a one-time "move to", 
-    // we can just use the mesh's world position.
+    // --- Dynamic Visuals Logic ---
+    const planetWorldPos = new THREE.Vector3();
+    if (planetRef.current) planetRef.current.getWorldPosition(planetWorldPos);
+    const distToCamera = state.camera.position.distanceTo(planetWorldPos);
 
-    // Adjust orbit opacity based on camera distance to keep it visible
-    if (orbitMaterialRef.current && !isSelected) {
-      const dist = state.camera.position.length();
-      // As distance increases, we boost opacity to compensate for the line getting thinner on screen
-      const opacity = THREE.MathUtils.lerp(0.3, 0.8, Math.min(dist / 500, 1));
-      orbitMaterialRef.current.opacity = opacity;
+    // A. Adjust Highlight Boundary Thickness (Scale)
+    if (highlightRef.current && isSelected) {
+      // Scale ranges from 1.05 (close) to 1.35 (far) relative to planet scale
+      const boost = THREE.MathUtils.mapLinear(distToCamera, 5, 500, 1.05, 1.35);
+      highlightRef.current.scale.setScalar(scale * Math.max(1.05, Math.min(boost, 1.35)));
+    }
+
+    // B. Adjust Orbit Line Thickness and Opacity
+    if (orbitRef.current) {
+      // Width ranges from base (close) to base * 3 (far)
+      const baseWidth = isSelected ? 2 : 0.8;
+      const targetWidth = THREE.MathUtils.mapLinear(distToCamera, 20, 1000, baseWidth, baseWidth * 4);
+      orbitRef.current.lineWidth = THREE.MathUtils.lerp(orbitRef.current.lineWidth || baseWidth, targetWidth, 0.1);
+
+      // Boost opacity when far away
+      const opacity = THREE.MathUtils.lerp(0.3, 0.8, Math.min(distToCamera / 1000, 1));
+      orbitRef.current.material.opacity = isSelected ? 1 : opacity;
     }
   });
 
@@ -90,30 +109,25 @@ const Planet = ({ planetData }) => {
 
   return (
     <>
-      {/* 6. The visual Orbit Line (Static, centered at [0,0,0]) */}
-      <mesh 
-        rotation={[-Math.PI / 2, 0, 0]} 
+      {/* 6. The visual Orbit Line (Now using Drei Line for better thickness control) */}
+      <Line
+        ref={orbitRef}
+        points={orbitPoints}
+        color={isSelected ? "#2271b3" : "#ffffff"}
+        transparent
+        opacity={0.3}
+        lineWidth={1}
         onClick={handlePlanetClick}
         onPointerOver={() => (document.body.style.cursor = 'pointer')}
         onPointerOut={() => (document.body.style.cursor = 'auto')}
-      >
-        {/* Torus creates a perfect ring at radius distanceX */}
-        <torusGeometry args={[distanceX, isSelected ? 0.03 : 0.012, 16, 100]} />
-        <meshBasicMaterial 
-          ref={orbitMaterialRef}
-          color={isSelected ? "#2271b3" : "#ffffff"} 
-          transparent 
-          opacity={isSelected ? 1 : 0.3} 
-          depthWrite={false}
-        />
-      </mesh>
+      />
 
       {/* 7. The Rotating Orbit Group */}
       <group ref={orbitGroupRef}>
         <group position={[distanceX, 0, 0]}>
           <mesh 
             ref={planetRef} 
-            name={planetData.englishName} // Add name for easy lookup
+            name={planetData.englishName}
             scale={[scale, scale, scale]}
             onClick={handlePlanetClick}
             onPointerOver={() => (document.body.style.cursor = 'pointer')}
@@ -129,7 +143,7 @@ const Planet = ({ planetData }) => {
 
           {/* 8. Selection Highlight (Rim/Border) */}
           {isSelected && (
-            <mesh scale={[scale * 1.1, scale * 1.1, scale * 1.1]}>
+            <mesh ref={highlightRef}>
               <sphereGeometry args={[1, 64, 64]} />
               <meshBasicMaterial 
                 color="#2271b3" 

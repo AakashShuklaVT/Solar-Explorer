@@ -75,6 +75,7 @@ body, html, #root {
 }
 
 .planet-card {
+  pointer-events: auto; /* Enable clicks on the card */
   background: rgba(10, 10, 10, 0.8); /* Slightly darker for better readability */
   backdrop-filter: blur(20px);
   padding: 20px;
@@ -99,6 +100,27 @@ body, html, #root {
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+
+.close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  font-size: 24px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  pointer-events: auto; /* Ensure it's clickable */
+  line-height: 1;
+}
+
+.close-btn:hover {
+  background: rgba(255, 30, 30, 0.4);
 }
 
 .planet-card h3::after {

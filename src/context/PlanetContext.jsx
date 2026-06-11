@@ -4,16 +4,16 @@ import { useFetch } from "../hooks/useFetch";
 const PlanetContext = createContext();
 
 export const PlanetProvider = ({ children }) => {
-    const [activePlanet, setActivePlanet] = useState("Earth");
+    const [activePlanet, setActivePlanet] = useState(null);
     const [isCameraAtDestination, setIsCameraAtDestination] = useState(false)
     const { data: sunData } = useFetch(`/api/bodies/soleil`);
     const { data: allPlanetsResponse, loading, error } = useFetch(`/api/bodies?filter[]=isPlanet,eq,true`);
 
     const planetsData = allPlanetsResponse ? allPlanetsResponse.bodies : [];
 
-    const activePlanetData = planetsData.find(
+    const activePlanetData = activePlanet ? planetsData.find(
         (p) => p.englishName.toLowerCase() === activePlanet.toLowerCase()
-    );
+    ) : null;
     
     const value = {
         planetsData,       
